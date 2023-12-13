@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router'
 import { HousingService } from '../housing.service';
 import { HousingLocation } from '../housing-location';
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms"
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms"
+import { flush } from '@angular/core/testing';
 
 @Component({
   selector: 'app-details',
@@ -33,7 +34,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms"
           <input type="text" formControlName="lastName" id="last-name">
           <label for="email">Email</label>
           <input type="email" formControlName="email" id="email">
-          <button type="submit" class="primary">Apply Now!</button>
+          <button type="submit" [disabled]="buttonDisabled && !applyform.valid" class="primary">{{buttonValue}}</button>
         </form>
       </section>
     </article>
@@ -45,24 +46,26 @@ route: ActivatedRoute = inject(ActivatedRoute);
 housingService = inject(HousingService)
 housingLocation: HousingLocation | undefined;
 applyform = new FormGroup({
-  firstName : new FormControl(''),
-  lastName : new FormControl(''),
-  email : new FormControl('')
+  firstName : new FormControl('',Validators.required),
+  lastName : new FormControl('',Validators.required),
+  email : new FormControl('', Validators.required)
 })
-
+buttonValue : string = "Apply Now!"
+buttonDisabled: boolean = false;
 constructor(){
   const housingLocationId = Number(this.route.snapshot.params['id']);
-  this.housingService.getHousingLocationById(housingLocationId)
-    .then((housingLocation) => {
-      return this.housingLocation = housingLocation; 
-    })
+  
+this.housingLocation =this.housingService.getHousingByID(housingLocationId)
+  
 }
 submitApplication(){
-  this.housingService.submitApplication(
-    this.applyform.value.firstName ?? "",
-    this.applyform.value.lastName ?? "",
-    this.applyform.value.email ?? ""
-)
-}
+  if (this.applyform.valid){
+  this.buttonValue = "Applying ...."
+  this.buttonDisabled = true
+  this.applyform.reset()
+  setTimeout(() => {
+    this.buttonValue = "Applied Success!"
+ },3000)
+}}
 
 }

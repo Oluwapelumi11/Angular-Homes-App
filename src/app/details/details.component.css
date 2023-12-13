@@ -11,7 +11,9 @@
     font-weight: bold;
     margin-bottom: 15px;
   }
-  
+  :disabled{
+    opacity: 60%;
+  }
   .listing-location::before {
     content: url('/assets/location-pin.svg') / '';
   }
